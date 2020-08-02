@@ -26,8 +26,12 @@ Classed included:
 class QuickSortGenerator:
 
     def __init__(self,arr):
-        self.arr = arr
-        self.gen = self._quick_sort(0,len(arr)-1)
+        
+        try:
+            self.arr = arr
+            self.gen = self._quick_sort(0,len(arr)-1)
+        except TypeError:
+            print("Error: Can only instantiate with an iterable.")
 
     def __next__(self):
         try:
@@ -66,9 +70,12 @@ class QuickSortGenerator:
 class SelectionSortGenerator:
 
     def __init__(self,arr):
-        self.arr = arr
-        self.length = len(arr)
-        self.gen = self._selection_sort()
+        try:
+            self.arr = arr
+            self.length = len(arr)
+            self.gen = self._selection_sort()
+        except TypeError:
+            print("Error: Can only instantiate with an iterable.")
 
     def __next__(self):
         try:

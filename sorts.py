@@ -28,10 +28,11 @@ class QuickSortGenerator:
     def __init__(self,arr):
         
         try:
-            self.arr = arr
             self.gen = self._quick_sort(0,len(arr)-1)
         except TypeError:
             print("Error: Can only instantiate with an iterable.")
+        else:
+            self.arr = arr
 
     def __next__(self):
         try:
@@ -71,11 +72,12 @@ class SelectionSortGenerator:
 
     def __init__(self,arr):
         try:
-            self.arr = arr
             self.length = len(arr)
-            self.gen = self._selection_sort()
         except TypeError:
             print("Error: Can only instantiate with an iterable.")
+        else:
+            self.arr = arr
+            self.gen = self._selection_sort()
 
     def __next__(self):
         try:
@@ -98,3 +100,56 @@ class SelectionSortGenerator:
             yield arr
             m = self._find_min_index(i,self.length)
             arr[i],arr[m] = arr[m],arr[i]
+
+class MergeSortGenerator:
+
+    def __init__(self,arr):
+        try:
+            self.gen = self._merge_sort(0,len(arr)-1)
+        except TypeError:
+            print("Error: Can only instantiate with an iterable.")
+        else:
+            self.arr = arr
+
+    def __next__(self):
+        try:
+            next_val = next(self.gen)
+        except StopIteration:
+            return 0
+        else:
+            return next_val
+
+    def _merge(self,l,h,m):
+        arr = self.arr
+        merged = [0]*(h-l+1)
+        i=l
+        j=m+1
+        k=0
+        while i<=m and j<=h:
+            if arr[i] < arr[j]:
+                merged[k] = arr[i]
+                i+=1
+            else:
+                merged[k] = arr[j]
+                j+=1
+            k+=1
+        while i<=m:
+            merged[k] = arr[i]
+            k+=1
+            i+=1
+        while j<=h:
+            merged[k] = arr[j]
+            k+=1
+            j+=1
+        self.arr[l:h+1] = merged
+
+    def _merge_sort(self,l,h):
+        if l<h:
+            mid = l + (h-l) // 2
+            yield from self._merge_sort(l,mid)
+            yield from self._merge_sort(mid+1,h)
+            self._merge(l,h,mid)
+            yield self.arr
+
+
+

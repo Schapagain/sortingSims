@@ -23,12 +23,13 @@ Classed included:
 
 '''
 
-class QuickSortGenerator:
+
+class SortGenerator:
 
     def __init__(self,arr):
         
         try:
-            self.gen = self._quick_sort(0,len(arr)-1)
+            self.gen = self._sort(0,len(arr)-1)
         except TypeError:
             print("Error: Can only instantiate with an iterable.")
         else:
@@ -41,6 +42,63 @@ class QuickSortGenerator:
             return 0
         else:
             return next_val
+    
+    def _sort(self,l,h):
+        return 0
+    
+    def _set_axis_label(self):
+        pass
+
+    def setup_animation(self,fig,ax):
+        self.animating = True
+        self.fig = fig
+        self.ax = ax
+        self.bar = ax.bar(list(range(len(self.arr))),self.arr)
+        self.text = ax.text(len(self.arr)/2 - 10, max(self.arr) , r'Time Elapsed: ', fontsize=10)
+        self.timeElapsed = 0
+        self._set_axis_label()
+    
+    def update_animation(self):
+
+        # Get the next state of the array
+        # record time taken
+        import time
+        t_init = time.time()
+        next_arr = self.__next__()
+        t_curr = time.time()
+        self.timeElapsed += t_curr - t_init
+
+        # stop animating if the generator is exhausted
+        # else update all bar heights
+        if next_arr == 0:
+            self.animating = False
+            return 0
+        else:
+            data_range = list(range(len(next_arr)))
+            for index,bar_height in zip(data_range,next_arr):
+                self.bar[index].set_height(bar_height)
+        self.text.set_text(r'Time Elapsed: {:.4f}'.format(self.timeElapsed))
+
+class SelectionSortGenerator(SortGenerator):
+
+    def _find_min_index(self,l,h):
+        m = l
+        for i in range(l,h):
+            if self.arr[i] < self.arr[m]:
+                m = i
+        return m
+
+    def _sort(self,l,h):
+        arr = self.arr
+        for i in range(h-l+1):
+            yield arr
+            m = self._find_min_index(i,h-l+1)
+            arr[i],arr[m] = arr[m],arr[i]
+
+    def _set_axis_label(self):
+        self.ax.set_title('Selection Sort')
+
+class QuickSortGenerator(SortGenerator):
 
     def _partition(self,l,h):
         import random
@@ -57,67 +115,20 @@ class QuickSortGenerator:
         arr[l],arr[j] = arr[j],arr[l]
 
         return j
-
-    def _quick_sort(self,l,h):
+    def _sort(self,l,h):
         if l>=h:
             return
         else:
             arr = self.arr
             m = self._partition(l,h)
             yield arr
-            yield from self._quick_sort(l,m-1)
-            yield from self._quick_sort(m+1,h)
+            yield from self._sort(l,m-1)
+            yield from self._sort(m+1,h)
 
-class SelectionSortGenerator:
+    def _set_axis_label(self):
+        self.ax.set_title('Quick Sort')
 
-    def __init__(self,arr):
-        try:
-            self.length = len(arr)
-        except TypeError:
-            print("Error: Can only instantiate with an iterable.")
-        else:
-            self.arr = arr
-            self.gen = self._selection_sort()
-
-    def __next__(self):
-        try:
-            next_val = next(self.gen)
-        except StopIteration:
-            return 0
-        else:
-            return next_val
-
-    def _find_min_index(self,l,h):
-        m = l
-        for i in range(l,h):
-            if self.arr[i] < self.arr[m]:
-                m = i
-        return m
-
-    def _selection_sort(self):
-        arr = self.arr
-        for i in range(self.length):
-            yield arr
-            m = self._find_min_index(i,self.length)
-            arr[i],arr[m] = arr[m],arr[i]
-
-class MergeSortGenerator:
-
-    def __init__(self,arr):
-        try:
-            self.gen = self._merge_sort(0,len(arr)-1)
-        except TypeError:
-            print("Error: Can only instantiate with an iterable.")
-        else:
-            self.arr = arr
-
-    def __next__(self):
-        try:
-            next_val = next(self.gen)
-        except StopIteration:
-            return 0
-        else:
-            return next_val
+class MergeSortGenerator(SortGenerator):
 
     def _merge(self,l,h,m):
         arr = self.arr
@@ -143,13 +154,13 @@ class MergeSortGenerator:
             j+=1
         self.arr[l:h+1] = merged
 
-    def _merge_sort(self,l,h):
+    def _sort(self,l,h):
         if l<h:
             mid = l + (h-l) // 2
-            yield from self._merge_sort(l,mid)
-            yield from self._merge_sort(mid+1,h)
+            yield from self._sort(l,mid)
+            yield from self._sort(mid+1,h)
             self._merge(l,h,mid)
             yield self.arr
 
-
-
+    def _set_axis_label(self):
+        self.ax.set_title('Merge Sort')

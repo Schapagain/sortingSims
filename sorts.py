@@ -8,6 +8,9 @@ after each sorting step.
 It contains several classes that can be instantiated as generators. 
 To get the next array after a sorting step, just call next(object).
 
+.setup_animation() and .update_animation() are used
+if you want the generators to be used to create animations
+
 INPUTS:
     -> Iterable to be sorted
 OUTPUTS:
@@ -17,9 +20,11 @@ OUTPUTS:
 
 Classed included:
 
+    SortGenerator -> Abstract
+
     QuickSortGenerator
     SelectionSortGenerator
-
+    MergeSortGenerator
 
 '''
 
@@ -49,15 +54,19 @@ class SortGenerator:
     def _set_axis_label(self):
         pass
 
+    def get_name(self):
+        pass
+
     def setup_animation(self,fig,ax):
         self.animating = True
         self.fig = fig
         self.ax = ax
-        self.bar = ax.bar(list(range(len(self.arr))),self.arr)
-        self.text = ax.text(len(self.arr)/2 - 10, max(self.arr) , r'Time Elapsed: ', fontsize=10)
+        self.ax.bar = ax.bar(list(range(len(self.arr))),self.arr)
+        self.text = ax.text(len(self.arr)//2-15, max(self.arr) , r'Time Elapsed: ', fontsize=10)
         self.timeElapsed = 0
-        self._set_axis_label()
+        self.ax.set_title(self.get_name())
     
+
     def update_animation(self):
 
         # Get the next state of the array
@@ -76,8 +85,12 @@ class SortGenerator:
         else:
             data_range = list(range(len(next_arr)))
             for index,bar_height in zip(data_range,next_arr):
-                self.bar[index].set_height(bar_height)
-        self.text.set_text(r'Time Elapsed: {:.4f}'.format(self.timeElapsed))
+                self.ax.bar[index].set_height(bar_height)
+
+        t_seconds = self.timeElapsed//60
+        t_mili = (self.timeElapsed-t_seconds)*1000
+        self.text.set_text(r'Time Elapsed: {:.2f} ms'.format(t_mili))
+        return 1
 
 class SelectionSortGenerator(SortGenerator):
 
@@ -95,8 +108,8 @@ class SelectionSortGenerator(SortGenerator):
             m = self._find_min_index(i,h-l+1)
             arr[i],arr[m] = arr[m],arr[i]
 
-    def _set_axis_label(self):
-        self.ax.set_title('Selection Sort')
+    def get_name(self):
+        return "Selection Sort"
 
 class QuickSortGenerator(SortGenerator):
 
@@ -115,6 +128,7 @@ class QuickSortGenerator(SortGenerator):
         arr[l],arr[j] = arr[j],arr[l]
 
         return j
+
     def _sort(self,l,h):
         if l>=h:
             return
@@ -125,8 +139,8 @@ class QuickSortGenerator(SortGenerator):
             yield from self._sort(l,m-1)
             yield from self._sort(m+1,h)
 
-    def _set_axis_label(self):
-        self.ax.set_title('Quick Sort')
+    def get_name(self):
+        return "Quick Sort"
 
 class MergeSortGenerator(SortGenerator):
 
@@ -162,5 +176,5 @@ class MergeSortGenerator(SortGenerator):
             self._merge(l,h,mid)
             yield self.arr
 
-    def _set_axis_label(self):
-        self.ax.set_title('Merge Sort')
+    def get_name(self):
+        return "Merge Sort"

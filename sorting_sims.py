@@ -4,39 +4,40 @@ from matplotlib import pyplot as plt
 import random
 import sorts
 
-# Define number of sorting algorithms
-numSorts = 1
+def main():
 
-# Define num of items to sort, and generate a random sample
-numItems = 100
-maxItem = 200
-random_array = random.sample(range(0,maxItem),numItems)
+    # Define num of items to sort, and generate a random sample
+    numItems = 100
+    maxItem = 100
+    random_array = random.sample(range(0,maxItem),numItems)
 
-# Create a list of sorting generators
-selection_gen = sorts.SelectionSortGenerator(random_array.copy())
-quick_gen = sorts.QuickSortGenerator(random_array.copy())
-merge_gen = sorts.MergeSortGenerator(random_array.copy())
-gens =[selection_gen,quick_gen,merge_gen]
+    # Create a list of sorting animations
+    selection_animation = sorts.SelectionSortGenerator(random_array.copy())
+    quick_animation = sorts.QuickSortGenerator(random_array.copy())
+    merge_animation = sorts.MergeSortGenerator(random_array.copy())
+    animations =[selection_animation,quick_animation,merge_animation]
 
-# Create the canvas to plot the animation
-fig,axs = plt.subplots(1,3,figsize=(15,7))
+    # Create the canvas to plot the animation
+    fig,axs = plt.subplots(1,3,figsize=(15,7))
 
-# Draw initial bar plots to the canvas and
-# initialize attributes for all sorting objects
-for index,gen in enumerate(gens):
-    gen.setup_animation(fig,axs[index])
+    # Draw initial bar plots to the canvas and
+    # initialize attributes for all sorting objects
+    for index,animation in enumerate(animations):
+        animation.setup_animation(fig,axs[index])
 
-# Update animatinos until all are complete
-while(True):
-    doneCount = 0
-    for gen in gens:
-        if not gen.animating:
-            continue
-        if(gen.update_animation())==0:
-            doneCount+=1
-    if doneCount == 2:
-        break
-    fig.canvas.draw()
-    plt.pause(0.00001)
+    def updateAnimations():
+        not_done = False
+        for animation in animations:
+            if animation.animating:
+                curr_not_done = animation.update_animation()
+                not_done = not_done or curr_not_done
+        return not_done
 
-plt.show()
+    not_done = True
+    while(not_done):
+        not_done = updateAnimations()
+        fig.canvas.draw()
+        plt.pause(0.0001)
+
+    plt.show()
+if __name__ == '__main__':main()
